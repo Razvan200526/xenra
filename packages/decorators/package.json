@@ -1,0 +1,20 @@
+{
+  "name": "@xenra/decorators",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "dependencies": {
+    "@xenra/http": "workspace:*",
+    "@xenra/logger": "workspace:*",
+    "reflect-metadata": "^0.2.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

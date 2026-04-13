@@ -17,5 +17,6 @@
     "strict": true,
     "target": "es2022",
     "customConditions": ["@org/source"]
-  }
+  },
+  "exclude": ["node_modules", ".claude", ".github", ".husky", ".nx", ".zed", ".vscode"]
 }

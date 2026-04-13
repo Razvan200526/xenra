@@ -1,14 +1,29 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "production": [
-      "default"
-    ],
-    "sharedGlobals": []
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"],
+    "sharedGlobals": [
+      "{workspaceRoot}/biome.jsonc",
+      "{workspaceRoot}/package.json",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/tsconfig.tools.json",
+      "{workspaceRoot}/bun.lock"
+    ]
+  },
+  "targetDefaults": {
+    "lint": {
+      "cache": true,
+      "inputs": ["default"]
+    },
+    "typecheck": {
+      "cache": true,
+      "inputs": ["default"]
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["default"]
+    }
   },
   "plugins": [
     {
