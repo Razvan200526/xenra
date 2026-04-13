@@ -35,6 +35,7 @@
       "name": "@xenra/core",
       "dependencies": {
         "@xenra/decorators": "workspace:*",
+        "@xenra/exceptions": "workspace:*",
         "@xenra/http": "workspace:*",
         "@xenra/logger": "workspace:*",
         "arktype": "^2.2.0",
@@ -53,6 +54,15 @@
         "@xenra/logger": "workspace:*",
         "reflect-metadata": "^0.2.2",
       },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
+    "packages/exceptions": {
+      "name": "@xenra/exceptions",
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -677,6 +687,8 @@
     "@xenra/core": ["@xenra/core@workspace:packages/core"],
 
     "@xenra/decorators": ["@xenra/decorators@workspace:packages/decorators"],
+
+    "@xenra/exceptions": ["@xenra/exceptions@workspace:packages/exceptions"],
 
     "@xenra/http": ["@xenra/http@workspace:packages/http"],
 

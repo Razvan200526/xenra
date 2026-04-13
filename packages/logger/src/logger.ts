@@ -15,8 +15,9 @@ export const logger = {
   exception: (error: unknown) => {
     if (error instanceof Error) {
       console.error(pe.render(error));
+    } else {
+      console.error(error);
     }
-    console.error(error);
   },
   warn: (message: string) => {
     console.warn(p.yellowBright(`${fallbackSymbols.warning} ${message}`));

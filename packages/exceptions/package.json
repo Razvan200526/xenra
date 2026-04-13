@@ -1,8 +1,11 @@
 {
-  "name": "middlware",
+  "name": "@xenra/exceptions",
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

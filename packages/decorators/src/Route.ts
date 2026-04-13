@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import type { HTTPMethod } from "@xenra/http";
+import type { HTTPMethod, Middleware } from "@xenra/http";
 import { isPathValid } from "./utils/isPathValid";
 import type { IValidator } from "./types";
 const ROUTE_META = Symbol("route:meta");
@@ -13,7 +13,7 @@ export type RouteConfigType = {
     query?: IValidator;
     params?: IValidator;
   };
-  middlwares?: unknown[];
+  middlewares?: Middleware[];
   description?: string;
 };
 

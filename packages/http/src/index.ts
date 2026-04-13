@@ -10,3 +10,5 @@ export * from "./utils/parseBody";
 export * from "./utils/matchRoute";
 export * from "./constants";
 export * from "./Router";
+export * from "./utils/createValidationMiddleware";
+export * from "./utils/runMiddlewares";

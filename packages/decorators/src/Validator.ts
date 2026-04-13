@@ -4,6 +4,7 @@ import { type } from "arktype";
 import type { IValidator } from "./types";
 import { Logger } from "./Logger";
 import type { logger } from "@xenra/logger";
+import { ValidationException } from "./exceptions/ValidationException";
 
 export interface Validator<TInput = unknown, TOutput = TInput> extends IValidator<TInput, TOutput> {
   logger: typeof logger;
@@ -18,7 +19,7 @@ export class Validator<TInput = unknown, TOutput = TInput> implements IValidator
     const result = this.schema(input);
 
     if (result instanceof type.errors) {
-      this.logger.exception(new Error(result.summary));
+      throw new ValidationException(result.summary);
     }
     return result as TOutput;
   }

@@ -19,6 +19,7 @@
     "@xenra/decorators": "workspace:*",
     "@xenra/http": "workspace:*",
     "@xenra/logger": "workspace:*",
+    "@xenra/exceptions": "workspace:*",
     "arktype": "^2.2.0"
   }
 }

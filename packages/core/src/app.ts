@@ -1,11 +1,11 @@
 /** biome-ignore-all lint/suspicious/noConsole: <until websocket implementation> */
 /** biome-ignore-all lint/suspicious/noUnsafeDeclarationMerging: <until websocket implementation> */
 
-import { createContext, parseBody, router } from "@xenra/http";
+import { createContext, createValidationMiddleware, parseBody, router, runMiddlewares } from "@xenra/http";
 import type { AppConfig, ServerType } from "../types";
 import { getRouteMetadata, Logger } from "@xenra/decorators";
 import type { logger } from "@xenra/logger";
-
+import { HttpException } from "@xenra/exceptions";
 export interface App {
   logger: typeof logger;
 }
@@ -39,35 +39,49 @@ export class App {
 
   readonly handleRequest = async (req: Request) => {
     const ctx = createContext(req);
-    ctx.body = await parseBody(ctx);
 
-    const matchedRoute = router.match(ctx.method, ctx.path);
-    if (!matchedRoute) {
-      return new Response("Not Found", { status: 404 });
+    try {
+      ctx.body = await parseBody(ctx);
+
+      const matchedRoute = router.match(ctx.method, ctx.path);
+      if (!matchedRoute) {
+        return ctx.text("Not Found", { status: 404 });
+      }
+
+      ctx.params = matchedRoute.params;
+
+      const meta = getRouteMetadata(matchedRoute.route.controller);
+      if (!meta) {
+        this.logger.error(`Missing route metadata for ${matchedRoute.route.controller.name}`);
+
+        return ctx.text("Internal Server Error", { status: 500 });
+      }
+
+      const middlewares = [createValidationMiddleware(meta), ...(meta.middlewares ?? [])];
+
+      return await runMiddlewares(ctx, middlewares, () => matchedRoute.route.handler(ctx));
+    } catch (err) {
+      if (err instanceof HttpException) {
+        this.logger.warn(err.message);
+
+        return ctx.json(
+          {
+            error: err.message,
+          },
+          { status: err.status_code ?? 400 },
+        );
+      }
+
+      this.logger.exception(err);
+
+      return ctx.json(
+        {
+          error: "Internal Server Error",
+        },
+        { status: 500 },
+      );
     }
-
-    ctx.params = matchedRoute.params;
-
-    const meta = getRouteMetadata(matchedRoute.route.controller);
-    if (!meta) {
-      return new Response("Route metadata missing", { status: 500 });
-    }
-
-    if (meta.validators?.query) {
-      ctx.validated.query = await meta.validators.query.validate(ctx.query);
-    }
-
-    if (meta.validators?.body) {
-      ctx.validated.body = await meta.validators.body.validate(ctx.body);
-    }
-
-    if (meta.validators?.params) {
-      ctx.validated.params = await meta.validators.params.validate(ctx.params);
-    }
-
-    return await matchedRoute.route.handler(ctx);
   };
-
   registerRoutes() {
     for (const Controller of this.config.controllers) {
       const meta = getRouteMetadata(Controller);

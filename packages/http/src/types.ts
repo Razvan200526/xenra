@@ -23,7 +23,7 @@ export type Context = {
 };
 
 export interface RouteHandler {
-  handler: (ctx: Context) => Response | Promise<Response>;
+  handler: (ctx: Context) => Promise<Response>;
 }
 
 export type ControllerInstance = RouteHandler;
@@ -53,3 +53,5 @@ export interface IRouter {
     params?: P,
   ) => string;
 }
+
+export type Middleware = (ctx: Context, next: () => Promise<Response>) => Promise<Response>;
