@@ -5,7 +5,9 @@
     "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["es2022"],
+    "lib": [
+      "es2022"
+    ],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "noEmitOnError": true,
@@ -16,7 +18,17 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@org/source"]
+    "customConditions": [
+      "@xenra/source"
+    ]
   },
-  "exclude": ["node_modules", ".claude", ".github", ".husky", ".nx", ".zed", ".vscode"]
+  "exclude": [
+    "node_modules",
+    ".codex",
+    ".github",
+    ".husky",
+    ".nx",
+    ".zed",
+    ".vscode"
+  ]
 }

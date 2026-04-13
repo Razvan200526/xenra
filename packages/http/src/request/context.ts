@@ -10,6 +10,14 @@ export function createContext(req: Request): Context {
     path: url.pathname,
     query: Object.fromEntries(url.searchParams),
     params: {},
+    body: undefined,
+    bodyParsed: false,
+
+    validated: {
+      body: undefined,
+      query: undefined,
+      params: undefined,
+    },
 
     json: (data, init) =>
       new Response(JSON.stringify(data), {
@@ -21,7 +29,14 @@ export function createContext(req: Request): Context {
       }),
 
     text: (data, init) => new Response(data, init),
+
     html: (data, init) =>
-      new Response(data, { ...init, headers: { "Content-Type": "text/html", ...(init?.headers || {}) } }),
+      new Response(data, {
+        ...init,
+        headers: {
+          "Content-Type": "text/html",
+          ...(init?.headers || {}),
+        },
+      }),
   };
 }

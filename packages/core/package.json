@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
     "dev": "bun run index.ts"
   },
@@ -13,8 +16,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "arktype": "^2.2.0",
     "@xenra/decorators": "workspace:*",
-    "@xenra/http": "workspace:*"
+    "@xenra/http": "workspace:*",
+    "@xenra/logger": "workspace:*",
+    "arktype": "^2.2.0"
   }
 }

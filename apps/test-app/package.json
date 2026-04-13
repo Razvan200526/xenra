@@ -1,0 +1,109 @@
+{
+  "name": "test-app",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/main.ts"
+  },
+  "nx": {
+    "name": "test-app",
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "defaultConfiguration": "production",
+        "options": {
+          "platform": "node",
+          "outputPath": "apps/test-app/dist",
+          "format": [
+            "cjs"
+          ],
+          "bundle": false,
+          "main": "apps/test-app/src/main.ts",
+          "tsConfig": "apps/test-app/tsconfig.app.json",
+          "assets": [
+            "apps/test-app/src/assets"
+          ],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        },
+        "configurations": {
+          "development": {},
+          "production": {
+            "esbuildOptions": {
+              "sourcemap": false,
+              "outExtension": {
+                ".js": ".js"
+              }
+            }
+          }
+        }
+      },
+      "prune-lockfile": {
+        "dependsOn": [
+          "build"
+        ],
+        "cache": true,
+        "executor": "@nx/js:prune-lockfile",
+        "outputs": [
+          "{workspaceRoot}/apps/test-app/dist/package.json",
+          "{workspaceRoot}/apps/test-app/dist/bun.lock"
+        ],
+        "options": {
+          "buildTarget": "build"
+        }
+      },
+      "copy-workspace-modules": {
+        "dependsOn": [
+          "build"
+        ],
+        "cache": true,
+        "outputs": [
+          "{workspaceRoot}/apps/test-app/dist/workspace_modules"
+        ],
+        "executor": "@nx/js:copy-workspace-modules",
+        "options": {
+          "buildTarget": "build"
+        }
+      },
+      "prune": {
+        "dependsOn": [
+          "prune-lockfile",
+          "copy-workspace-modules"
+        ],
+        "executor": "nx:noop"
+      },
+      "serve": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "test-app:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "test-app:build:development"
+          },
+          "production": {
+            "buildTarget": "test-app:build:production"
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@xenra/core": "workspace:*",
+    "@xenra/decorators": "workspace:*",
+    "@xenra/http": "workspace:*"
+  }
+}

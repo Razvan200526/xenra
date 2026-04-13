@@ -1,26 +1,36 @@
 import "reflect-metadata";
 import type { HTTPMethod } from "@xenra/http";
-
+import { isPathValid } from "./utils/isPathValid";
+import type { IValidator } from "./types";
 const ROUTE_META = Symbol("route:meta");
 
-type RouteConfig = {
+export type RouteConfigType = {
+  name: string;
+  method?: string;
   path: string;
-  request?: unknown;
-  response?: unknown;
+  validators?: {
+    body?: IValidator;
+    query?: IValidator;
+    params?: IValidator;
+  };
   middlwares?: unknown[];
   description?: string;
 };
 
+export type RouteMetadata = RouteConfigType & { method: HTTPMethod };
 export function createRouteDecorator(method: HTTPMethod) {
-  return (options: string | RouteConfig): ClassDecorator => {
+  return (options: RouteConfigType): ClassDecorator => {
+    const { path } = options;
+    options.method = method;
     return (target) => {
-      const config = typeof options === "string" ? { path: options } : options;
+      if (!isPathValid(path, target.name)) {
+        process.exit(1);
+      }
 
       Reflect.defineMetadata(
         ROUTE_META,
         {
-          method,
-          ...config,
+          ...options,
         },
         target,
       );
@@ -37,6 +47,6 @@ export const Route = {
 };
 
 // biome-ignore lint/complexity/noBannedTypes: <constructor>
-export function getRouteMetadata(target: Function) {
+export function getRouteMetadata(target: Function): RouteMetadata {
   return Reflect.getMetadata(ROUTE_META, target);
 }
