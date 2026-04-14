@@ -1,2 +1,2 @@
 export { App } from "./src/app";
-export type { AppConfig, ServerType } from "./types";
+export type { AppConfig, ServerType } from "./src/types";

@@ -1,17 +1,20 @@
 {
-  "name": "@org/source",
-  "version": "0.0.0",
+  "name": "xenra",
   "license": "MIT",
   "scripts": {
-    "format": "bun x biome format . --write",
-    "format:check": "bun x biome format .",
-    "lint": "bun x biome lint .",
-    "typecheck": "bun x tsc -p tsconfig.tools.json --noEmit"
+    "build": "bunx nx run-many -t build --output-style=stream --verbose",
+    "test": "bunx nx run-many -t test --output-style=stream --verbose",
+    "check": "bun install && bun run build && bun run lint && bun run test",
+    "fmt": "bunx biome check --write",
+    "lint": "bunx nx run-many -t lint --output-style=stream --verbose",
+    "npm:publish": "bunx nx run-many -t npm:publish --output-style=stream --verbose",
+    "commit": "bunx commit"
   },
   "nx": {},
   "private": true,
   "dependencies": {
     "@biomejs/biome": "^2.4.11",
+    "@types/bun": "^1.3.12",
     "arktype": "^2.2.0"
   },
   "devDependencies": {

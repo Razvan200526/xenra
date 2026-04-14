@@ -10,7 +10,7 @@ export const logger = {
     console.error(p.redBright(`${fallbackSymbols.cross} ${message}`));
   },
   success: (message: string) => {
-    console.log(p.greenBright(`${fallbackSymbols.tick} ${message}`));
+    console.log(p.green(`${fallbackSymbols.tick} ${message}`));
   },
   exception: (error: unknown) => {
     if (error instanceof Error) {

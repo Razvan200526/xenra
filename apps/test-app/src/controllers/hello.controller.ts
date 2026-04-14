@@ -6,10 +6,12 @@ import { type } from "arktype";
 const validator = new Validator(
   type({
     message: "string",
+    age: "number",
+    name: "string",
   }),
 );
 
-@Route.post({ name: "hello", path: "/asdasd", validators: { body: validator } })
+@Route.post({ name: "hello", path: "/", validators: { body: validator } })
 export class HelloController {
   async handler(ctx: Context) {
     return ctx.json({

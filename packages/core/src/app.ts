@@ -1,11 +1,11 @@
 /** biome-ignore-all lint/suspicious/noConsole: <until websocket implementation> */
 /** biome-ignore-all lint/suspicious/noUnsafeDeclarationMerging: <until websocket implementation> */
 
-import { createContext, createValidationMiddleware, parseBody, router, runMiddlewares } from "@xenra/http";
-import type { AppConfig, ServerType } from "../types";
 import { getRouteMetadata, Logger } from "@xenra/decorators";
+import { createContext, createValidationMiddleware, parseBody, router, runMiddlewares } from "@xenra/http";
 import type { logger } from "@xenra/logger";
-import { HttpException } from "@xenra/exceptions";
+import type { AppConfig, ServerType } from "./types";
+import { handleRouteException } from "./handleRouteException";
 export interface App {
   logger: typeof logger;
 }
@@ -13,28 +13,44 @@ export interface App {
 @Logger
 export class App {
   readonly config: AppConfig;
-  readonly server: ServerType;
+  private server: ServerType | null = null;
 
   constructor(config: AppConfig) {
     this.config = config;
     this.registerRoutes();
+  }
+
+  async run(port = 3000): Promise<this> {
+    if (this.server) {
+      this.logger.warn("Server is already running");
+      return this;
+    }
 
     this.server = Bun.serve({
-      port: 3000,
-      websocket: {
-        open: () => {
-          console.log("Client connected");
-        },
-        message: (message) => {
-          console.log("Client sent message", message);
-        },
-        close: () => {
-          console.log("Client disconnected");
-        },
-      },
+      port,
       fetch: this.handleRequest,
       hostname: "0.0.0.0",
     });
+
+    let hostname = this.server.hostname || "0.0.0.0";
+
+    if (hostname === "0.0.0.0") {
+      hostname = "localhost";
+    }
+    const serverUrl = `${this.server.protocol}://${hostname}:${port}`;
+    this.logger.success(`Server listening on ${serverUrl}`);
+    return this;
+  }
+
+  close(): this {
+    if (!this.server) {
+      this.logger.warn("Server is not running");
+      return this;
+    }
+
+    this.server.stop();
+    this.server = null;
+    return this;
   }
 
   readonly handleRequest = async (req: Request) => {
@@ -61,25 +77,7 @@ export class App {
 
       return await runMiddlewares(ctx, middlewares, () => matchedRoute.route.handler(ctx));
     } catch (err) {
-      if (err instanceof HttpException) {
-        this.logger.warn(err.message);
-
-        return ctx.json(
-          {
-            error: err.message,
-          },
-          { status: err.status_code ?? 400 },
-        );
-      }
-
-      this.logger.exception(err);
-
-      return ctx.json(
-        {
-          error: "Internal Server Error",
-        },
-        { status: 500 },
-      );
+      return handleRouteException(ctx, err);
     }
   };
   registerRoutes() {
