@@ -2,18 +2,24 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true
     },
     "fmt": {
       "cache": true
     },
     "lint": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true
     }
   },
@@ -21,5 +27,6 @@
     "autoExit": true
   },
   "packageManager": "bun",
-  "analytics": false
+  "analytics": false,
+  "nxCloudId": "69e1fd57d10ae19324cfb2e5"
 }
