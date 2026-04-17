@@ -12,6 +12,7 @@
   "dependencies": {
     "@xenra/http": "workspace:*",
     "@xenra/logger": "workspace:*",
+    "@xenra/exceptions": "workspace:*",
     "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {

@@ -1,6 +1,25 @@
+import type { IValidator, RouteValidators } from "@xenra/decorators";
 import type { RouteMatch } from "./utils/matchRoute";
 
-export type Context = {
+type InferValidatorOutput<TValidator> =
+  TValidator extends IValidator<unknown, infer TOutput> ? Awaited<TOutput> : unknown;
+
+type InferValidatedValue<TValidators extends RouteValidators | undefined, TKey extends keyof RouteValidators> =
+  TValidators extends Record<TKey, infer TValidator> ? InferValidatorOutput<TValidator> : unknown;
+
+export type ValidatedData = {
+  body: unknown;
+  query: unknown;
+  params: unknown;
+};
+
+export type InferValidated<TValidators extends RouteValidators | undefined = undefined> = ValidatedData & {
+  body: InferValidatedValue<TValidators, "body">;
+  query: InferValidatedValue<TValidators, "query">;
+  params: InferValidatedValue<TValidators, "params">;
+};
+
+export type Context<TValidated extends ValidatedData = ValidatedData> = {
   req: Request;
   url: URL;
 
@@ -11,31 +30,34 @@ export type Context = {
   body?: unknown;
   bodyParsed: boolean;
 
-  validated: {
-    body?: unknown;
-    query?: unknown;
-    params?: unknown;
-  };
+  validated: TValidated;
 
   json: (data: unknown, init?: ResponseInit) => Response;
   text: (data: string, init?: ResponseInit) => Response;
   html: (data: string, init?: ResponseInit) => Response;
 };
 
-export interface RouteHandler {
-  handler: (ctx: Context) => Promise<Response>;
+export type ContextFromValidators<TValidators extends RouteValidators | undefined = undefined> = Context<
+  InferValidated<TValidators>
+>;
+
+export interface RouteHandler<TValidated extends ValidatedData = ValidatedData> {
+  handler: (ctx: Context<TValidated>) => Promise<Response>;
 }
 
-export type ControllerInstance = RouteHandler;
-// biome-ignore lint/suspicious/noExplicitAny: <trust me>
-export type IController = new (...args: any[]) => ControllerInstance;
+export type ControllerInstance<TValidated extends ValidatedData = ValidatedData> = RouteHandler<TValidated>;
+export type IController<TValidated extends ValidatedData = ValidatedData> = new (
+  ...args: unknown[]
+) => ControllerInstance<TValidated>;
 
 export interface RegisteredRoute {
   name: string;
   method: HTTPMethod;
   path: string;
-  handler: RouteHandler["handler"];
+  handler: string;
+  validators?: RouteValidators;
   controller: IController;
+  middlewares?: Middleware[];
 }
 
 export type HTTPMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
@@ -54,4 +76,7 @@ export interface IRouter {
   ) => string;
 }
 
-export type Middleware = (ctx: Context, next: () => Promise<Response>) => Promise<Response>;
+export type Middleware<TContext extends Context = Context> = (
+  ctx: TContext,
+  next: () => Promise<Response>,
+) => Promise<Response>;

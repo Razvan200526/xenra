@@ -1,11 +1,12 @@
 /** biome-ignore-all lint/suspicious/noConsole: <until websocket implementation> */
 /** biome-ignore-all lint/suspicious/noUnsafeDeclarationMerging: <until websocket implementation> */
 
-import { getRouteMetadata, Logger } from "@xenra/decorators";
-import { createContext, createValidationMiddleware, parseBody, router, runMiddlewares } from "@xenra/http";
+import { container } from "@xenra/container";
+import { Logger } from "@xenra/decorators";
+import { createContext, parseBody, router, runMiddlewares } from "@xenra/http";
 import type { logger } from "@xenra/logger";
-import type { AppConfig, ServerType } from "./types";
 import { handleRouteException } from "./handleRouteException";
+import type { AppConfig, ServerType } from "./types";
 export interface App {
   logger: typeof logger;
 }
@@ -17,7 +18,6 @@ export class App {
 
   constructor(config: AppConfig) {
     this.config = config;
-    this.registerRoutes();
   }
 
   async run(port = 3000): Promise<this> {
@@ -66,38 +66,17 @@ export class App {
 
       ctx.params = matchedRoute.params;
 
-      const meta = getRouteMetadata(matchedRoute.route.controller);
-      if (!meta) {
-        this.logger.error(`Missing route metadata for ${matchedRoute.route.controller.name}`);
+      const route = matchedRoute.route;
+      const middlewares = route.middlewares ?? [];
 
-        return ctx.text("Internal Server Error", { status: 500 });
-      }
+      return await runMiddlewares(ctx, middlewares, async () => {
+        const controller = container.get(route.controller);
 
-      const middlewares = [createValidationMiddleware(meta), ...(meta.middlewares ?? [])];
-
-      return await runMiddlewares(ctx, middlewares, () => matchedRoute.route.handler(ctx));
+        const handler = controller.handler;
+        return await handler.call(controller, ctx);
+      });
     } catch (err) {
       return handleRouteException(ctx, err);
     }
   };
-  registerRoutes() {
-    for (const Controller of this.config.controllers) {
-      const meta = getRouteMetadata(Controller);
-
-      if (!meta) {
-        this.logger.exception(new Error(`Controller ${Controller.name} has no route metadata`));
-        continue;
-      }
-
-      const instance = new Controller();
-
-      router.addRoute({
-        name: meta.name,
-        method: meta.method,
-        path: meta.path,
-        handler: instance.handler.bind(instance),
-        controller: Controller,
-      });
-    }
-  }
 }

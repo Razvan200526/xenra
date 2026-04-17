@@ -32,9 +32,22 @@
         "@xenra/http": "workspace:*",
       },
     },
+    "packages/container": {
+      "name": "@xenra/container",
+      "dependencies": {
+        "inversify": "^8.1.0",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
+    },
     "packages/core": {
       "name": "@xenra/core",
       "dependencies": {
+        "@xenra/container": "workspace:*",
         "@xenra/decorators": "workspace:*",
         "@xenra/exceptions": "workspace:*",
         "@xenra/http": "workspace:*",
@@ -51,6 +64,7 @@
     "packages/decorators": {
       "name": "@xenra/decorators",
       "dependencies": {
+        "@xenra/exceptions": "workspace:*",
         "@xenra/http": "workspace:*",
         "@xenra/logger": "workspace:*",
         "reflect-metadata": "^0.2.2",
@@ -74,6 +88,7 @@
     "packages/http": {
       "name": "@xenra/http",
       "dependencies": {
+        "@xenra/container": "workspace:*",
         "@xenra/decorators": "workspace:*",
         "@xenra/logger": "workspace:*",
         "arktype": "^2.2.0",
@@ -427,6 +442,18 @@
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
 
+    "@inversifyjs/common": ["@inversifyjs/common@2.0.1", "", {}, "sha512-pJAR4IAcT2jkYfZ9bD9XhtUDBLJRr8QOiSjb+2XyaHru6DLvu0VD2Id2iP7+tVRKkEe3XFUwDUEdKxcYlF699Q=="],
+
+    "@inversifyjs/container": ["@inversifyjs/container@2.0.1", "", { "dependencies": { "@inversifyjs/common": "2.0.1", "@inversifyjs/core": "10.0.1", "@inversifyjs/plugin": "0.3.1", "@inversifyjs/reflect-metadata-utils": "1.5.0" }, "peerDependencies": { "reflect-metadata": "~0.2.2" } }, "sha512-xoZU4Mha5Vo+U04xWUnD01QbpQMNoIh0nUEFlb965E3rIneUbsYYiXeLUoKl57BjXjErsOL0q8o3mXi1si8rBA=="],
+
+    "@inversifyjs/core": ["@inversifyjs/core@10.0.1", "", { "dependencies": { "@inversifyjs/common": "2.0.1", "@inversifyjs/prototype-utils": "0.2.1", "@inversifyjs/reflect-metadata-utils": "1.5.0" } }, "sha512-z+DHdTbHFETivPLPRgowz9wWhHA4FNYqQnKhPyDCz7zX9H/PIDcK4gZIF1YNaf5Uc2bd1nehSlVgfaTzVbb0AA=="],
+
+    "@inversifyjs/plugin": ["@inversifyjs/plugin@0.3.1", "", {}, "sha512-ByklTw731fydBCTMwMpkmwm+lv0U+JWm9NEqRsz3n5KzAC5Om2XtLjqzEC2w+8Ote3gVC3Qxsx6YmG9XLIZpvg=="],
+
+    "@inversifyjs/prototype-utils": ["@inversifyjs/prototype-utils@0.2.1", "", { "dependencies": { "@inversifyjs/common": "2.0.1" } }, "sha512-53cVE3cw+RxnSkGlg+jOFNSox2owJF9Fv3HgFKe4f+4aPullscltIiio88QRkx2Sc5yo3VlqPsXQFGw2CVJZnw=="],
+
+    "@inversifyjs/reflect-metadata-utils": ["@inversifyjs/reflect-metadata-utils@1.5.0", "", { "peerDependencies": { "reflect-metadata": "~0.2.2" } }, "sha512-NpJVbRbuQ6Ao2vO+aw96un3oHDFCwXI0+pplsFt0Jh0gyR8DWk4m7ml/GBNMjdbeKVW/QgJ2S6NGXjk042uwqg=="],
+
     "@isaacs/cliui": ["@isaacs/cliui@8.0.2", "", { "dependencies": { "string-width": "^5.1.2", "string-width-cjs": "npm:string-width@^4.2.0", "strip-ansi": "^7.0.1", "strip-ansi-cjs": "npm:strip-ansi@^6.0.1", "wrap-ansi": "^8.1.0", "wrap-ansi-cjs": "npm:wrap-ansi@^7.0.0" } }, "sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA=="],
 
     "@istanbuljs/load-nyc-config": ["@istanbuljs/load-nyc-config@1.1.0", "", { "dependencies": { "camelcase": "^5.3.1", "find-up": "^4.1.0", "get-package-type": "^0.1.0", "js-yaml": "^3.13.1", "resolve-from": "^5.0.0" } }, "sha512-VjeHSlIzpv/NyD3N0YuHfXOPDIixcA1q2ZV98wsMqcYlPmv2n3Yb2lYP9XMElnaFVXg5A7YLTeLu6V84uQDjmQ=="],
@@ -676,6 +703,8 @@
     "@unrs/resolver-binding-win32-ia32-msvc": ["@unrs/resolver-binding-win32-ia32-msvc@1.11.1", "", { "os": "win32", "cpu": "ia32" }, "sha512-DCEI6t5i1NmAZp6pFonpD5m7i6aFrpofcp4LA2i8IIq60Jyo28hamKBxNrZcyOwVOZkgsRp9O2sXWBWP8MnvIQ=="],
 
     "@unrs/resolver-binding-win32-x64-msvc": ["@unrs/resolver-binding-win32-x64-msvc@1.11.1", "", { "os": "win32", "cpu": "x64" }, "sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g=="],
+
+    "@xenra/container": ["@xenra/container@workspace:packages/container"],
 
     "@xenra/core": ["@xenra/core@workspace:packages/core"],
 
@@ -990,6 +1019,8 @@
     "inflight": ["inflight@1.0.6", "", { "dependencies": { "once": "^1.3.0", "wrappy": "1" } }, "sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA=="],
 
     "inherits": ["inherits@2.0.4", "", {}, "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="],
+
+    "inversify": ["inversify@8.1.0", "", { "dependencies": { "@inversifyjs/common": "2.0.1", "@inversifyjs/container": "2.0.1", "@inversifyjs/core": "10.0.1" } }, "sha512-LeMjL2MKHM0E8UmKo2ilRvdxG3o0pLZPYFjkaHwcjcFIrhzBGetphNkaWJ6YaM78uC1gK9v45i1R7CkCJDvG4Q=="],
 
     "ip-regex": ["ip-regex@4.3.0", "", {}, "sha512-B9ZWJxHHOHUhUjCPrMpLD4xEq35bUTClHM1S6CBU5ixQnkZmwipwgc96vAd7AAGM9TGHvJR+Uss+/Ak6UphK+Q=="],
 

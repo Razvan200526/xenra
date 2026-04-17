@@ -3,14 +3,21 @@
   "license": "MIT",
   "scripts": {
     "build": "bunx nx run-many -t build --output-style=stream --verbose",
-    "test": "bunx nx run-many -t test --output-style=stream --verbose",
+    "test": "bun test --path-ignore-patterns '**/dist/**'",
     "check": "bun install && bun run build && bun run lint && bun run test",
-    "fmt": "bunx biome check --write",
-    "lint": "bunx nx run-many -t lint --output-style=stream --verbose",
-    "npm:publish": "bunx nx run-many -t npm:publish --output-style=stream --verbose",
+    "fmt": "bunx @biomejs/biome check --write",
+    "lint": "bunx @biomejs/biome check .",
+    "npm:publish": "bunx nx run-many -t nx-release-publish --output-style=stream --verbose",
     "commit": "bunx commit"
   },
-  "nx": {},
+  "nx": {
+    "includedScripts": [
+      "check",
+      "fmt",
+      "commit",
+      "lint"
+    ]
+  },
   "private": true,
   "dependencies": {
     "@biomejs/biome": "^2.4.11",

@@ -4,7 +4,7 @@
   "type": "module",
   "private": false,
   "scripts": {
-    "dev": "bun run src/main.ts"
+    "dev": "bun run --hot src/main.ts"
   },
   "nx": {
     "name": "test-app",

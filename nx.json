@@ -17,6 +17,15 @@
       "cache": true
     }
   },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx-cloud",
+      "options": {
+        "cacheableOperations": ["build", "test"],
+        "accessToken": "ZDZhOGVmZTgtMTJiMy00YWFkLTk2YmMtZTc1MGQyNDE1OGI4fHJlYWQtd3JpdGU="
+      }
+    }
+  },
   "tui": {
     "autoExit": true
   },

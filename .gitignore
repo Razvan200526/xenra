@@ -1,5 +1,8 @@
 # See https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
 
+todo.md
+framework-review.md
+
 # compiled output
 dist
 tmp
@@ -47,3 +50,4 @@ Thumbs.db
 .claude/worktrees
 .claude/settings.local.json
 .nx/polygraph
+nx.json

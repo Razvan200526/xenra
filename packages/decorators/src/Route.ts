@@ -1,39 +1,59 @@
 import "reflect-metadata";
-import type { HTTPMethod, Middleware } from "@xenra/http";
+import {
+  type Context,
+  createValidationMiddleware,
+  type HTTPMethod,
+  type IController,
+  type InferValidated,
+  type Middleware,
+  router,
+} from "@xenra/http";
+import type { RouteValidators } from "./types";
 import { isPathValid } from "./utils/isPathValid";
-import type { IValidator } from "./types";
+
 const ROUTE_META = Symbol("route:meta");
 
-export type RouteConfigType = {
+export type RouteConfigType<TValidators extends RouteValidators | undefined = undefined> = {
   name: string;
   method?: string;
   path: string;
-  validators?: {
-    body?: IValidator;
-    query?: IValidator;
-    params?: IValidator;
-  };
-  middlewares?: Middleware[];
+  validators?: TValidators;
+  middlewares?: Middleware<Context<InferValidated<TValidators>>>[];
   description?: string;
 };
 
-export type RouteMetadata = RouteConfigType & { method: HTTPMethod };
+export type RouteMetadata<TValidators extends RouteValidators | undefined = undefined> =
+  RouteConfigType<TValidators> & {
+    method: HTTPMethod;
+  };
+
 export function createRouteDecorator(method: HTTPMethod) {
-  return (options: RouteConfigType): ClassDecorator => {
-    const { path } = options;
-    options.method = method;
+  return <TValidators extends RouteValidators | undefined = undefined>(
+    options: RouteConfigType<TValidators>,
+  ): ClassDecorator => {
     return (target) => {
-      if (!isPathValid(path, target.name)) {
+      if (!isPathValid(options.path, target.name)) {
         process.exit(1);
       }
 
-      Reflect.defineMetadata(
-        ROUTE_META,
-        {
-          ...options,
-        },
-        target,
-      );
+      const meta: RouteMetadata<TValidators> = {
+        ...options,
+        method,
+      };
+
+      Reflect.defineMetadata(ROUTE_META, meta, target);
+
+      const route = {
+        name: meta.name,
+        method: meta.method,
+        path: meta.path,
+        handler: "handler",
+        controller: target as unknown as IController,
+        middlewares: [...(meta.middlewares ?? []), createValidationMiddleware(meta)] as Middleware[],
+        ...(meta.validators ? { validators: meta.validators } : {}),
+      };
+
+      router.addRoute(route);
     };
   };
 }
@@ -46,7 +66,8 @@ export const Route = {
   patch: createRouteDecorator("PATCH"),
 };
 
-// biome-ignore lint/complexity/noBannedTypes: <constructor>
-export function getRouteMetadata(target: Function): RouteMetadata {
+export function getRouteMetadata<TValidators extends RouteValidators | undefined = undefined>(
+  target: object,
+): RouteMetadata<TValidators> | undefined {
   return Reflect.getMetadata(ROUTE_META, target);
 }

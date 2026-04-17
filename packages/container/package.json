@@ -1,5 +1,5 @@
 {
-  "name": "@xenra/http",
+  "name": "@xenra/container",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -13,9 +13,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "arktype": "^2.2.0",
-    "@xenra/logger": "workspace:*",
-    "@xenra/decorators": "workspace:*",
-    "@xenra/container": "workspace:*"
+    "inversify": "^8.1.0"
   }
 }

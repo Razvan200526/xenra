@@ -1,8 +1,9 @@
 /** biome-ignore-all lint/suspicious/noUnsafeDeclarationMerging: <logger util> */
 
+import { container, EContainerScope } from "@xenra/container";
 import { logger } from "@xenra/logger";
-import type { IRouter, RegisteredRoute } from "./types";
 import { RouterException } from "./exceptions/RouterException";
+import type { IRouter, RegisteredRoute } from "./types";
 import { matchRoute, type RouteMatch } from "./utils/matchRoute";
 
 export interface Router extends IRouter {
@@ -33,6 +34,7 @@ export class Router implements IRouter {
 
     routes.push(route);
     this.routes.set(route.path, routes);
+    container.add(route.controller, EContainerScope.Singleton);
 
     return this;
   }

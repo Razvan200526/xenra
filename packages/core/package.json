@@ -20,6 +20,7 @@
     "@xenra/http": "workspace:*",
     "@xenra/logger": "workspace:*",
     "@xenra/exceptions": "workspace:*",
+    "@xenra/container": "workspace:*",
     "arktype": "^2.2.0"
   }
 }

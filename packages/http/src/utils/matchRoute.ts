@@ -47,8 +47,9 @@ function getRouteParams(routePath: string, requestPath: string): Record<string, 
 }
 
 export function matchRoute(routes: RegisteredRoute[] | undefined, method: string, path: string): RouteMatch | null {
+  const normalizedMethod = method.toUpperCase();
   for (const route of routes ?? []) {
-    if (route.method !== method) {
+    if (route.method !== normalizedMethod) {
       continue;
     }
 

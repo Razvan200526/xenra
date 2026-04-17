@@ -1,6 +1,6 @@
 import { routeRegex } from "@xenra/http";
-import { type } from "arktype";
 import { logger } from "@xenra/logger";
+import { type } from "arktype";
 
 export const pathNameFormat = type(routeRegex);
 
