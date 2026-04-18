@@ -1,20 +1,21 @@
-import type { RouteMetadata, RouteValidators } from "@xenra/decorators";
-import type { Context, InferValidated, Middleware, ValidatedData } from "../types";
+import type { Context, InferValidated, Middleware, RouteValidators, ValidatedData } from "../types";
 
-export function createValidationMiddleware<TValidators extends RouteValidators | undefined = undefined>(
-  meta: RouteMetadata<TValidators>,
-): Middleware<Context<InferValidated<TValidators>>> {
+export function createValidationMiddleware<
+  TValidators extends RouteValidators | undefined = undefined,
+  TContext extends Context<InferValidated<TValidators>> = Context<InferValidated<TValidators>>,
+  TResult = Response,
+>(validators: TValidators): Middleware<TContext, TResult> {
   return async (ctx, next) => {
-    if (meta.validators?.query) {
-      (ctx.validated as ValidatedData).query = await meta.validators.query.validate(ctx.query);
+    if (validators?.query) {
+      (ctx.validated as ValidatedData).query = await validators.query.validate(ctx.query);
     }
 
-    if (meta.validators?.body) {
-      (ctx.validated as ValidatedData).body = await meta.validators.body.validate(ctx.body);
+    if (validators?.body) {
+      (ctx.validated as ValidatedData).body = await validators.body.validate(ctx.body);
     }
 
-    if (meta.validators?.params) {
-      (ctx.validated as ValidatedData).params = await meta.validators.params.validate(ctx.params);
+    if (validators?.params) {
+      (ctx.validated as ValidatedData).params = await validators.params.validate(ctx.params);
     }
 
     return next();

@@ -105,6 +105,8 @@
   "dependencies": {
     "@xenra/core": "workspace:*",
     "@xenra/decorators": "workspace:*",
-    "@xenra/http": "workspace:*"
+    "@xenra/http": "workspace:*",
+    "@xenra/socket": "workspace:*",
+    "arktype": "^2.2.0"
   }
 }

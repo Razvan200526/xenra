@@ -1,7 +1,9 @@
 export class HttpException extends Error {
-  status_code: number;
-  constructor(message: string, status_code = 500) {
+  statusCode: number;
+
+  constructor(message: string, statusCode = 500) {
     super(message);
-    this.status_code = status_code;
+    this.name = "HttpException";
+    this.statusCode = statusCode;
   }
 }

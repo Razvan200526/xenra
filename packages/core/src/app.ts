@@ -1,19 +1,30 @@
 /** biome-ignore-all lint/suspicious/noConsole: <until websocket implementation> */
-/** biome-ignore-all lint/suspicious/noUnsafeDeclarationMerging: <until websocket implementation> */
 
-import { container } from "@xenra/container";
-import { Logger } from "@xenra/decorators";
+import { container, EContainerScope } from "@xenra/container";
 import { createContext, parseBody, router, runMiddlewares } from "@xenra/http";
-import type { logger } from "@xenra/logger";
+import { logger } from "@xenra/logger";
+import {
+  cleanupSocketSession,
+  type SocketConnectionData,
+  type SocketMessage,
+  socketHandler,
+  tryUpgradeSocket,
+} from "@xenra/socket";
+import type { Server, ServerWebSocket } from "bun";
 import { handleRouteException } from "./handleRouteException";
 import type { AppConfig, ServerType } from "./types";
-export interface App {
-  logger: typeof logger;
+
+function resolveController<T>(controller: new (...args: unknown[]) => T): T {
+  if (!container.has(controller)) {
+    container.add(controller, EContainerScope.Singleton);
+  }
+
+  return container.get(controller);
 }
 
-@Logger
 export class App {
   readonly config: AppConfig;
+  readonly logger: typeof logger = logger;
   private server: ServerType | null = null;
 
   constructor(config: AppConfig) {
@@ -29,6 +40,23 @@ export class App {
     this.server = Bun.serve({
       port,
       fetch: this.handleRequest,
+      websocket: {
+        perMessageDeflate: true,
+        message: async (ws: ServerWebSocket<SocketConnectionData>, message: SocketMessage) => {
+          if (!this.server) {
+            return;
+          }
+
+          await socketHandler({
+            ws,
+            server: this.server,
+            message,
+          });
+        },
+        close: (ws: ServerWebSocket<SocketConnectionData>) => {
+          cleanupSocketSession(ws);
+        },
+      },
       hostname: "0.0.0.0",
     });
 
@@ -53,30 +81,38 @@ export class App {
     return this;
   }
 
-  readonly handleRequest = async (req: Request) => {
-    const ctx = createContext(req);
-
-    try {
-      ctx.body = await parseBody(ctx);
-
-      const matchedRoute = router.match(ctx.method, ctx.path);
-      if (!matchedRoute) {
-        return ctx.text("Not Found", { status: 404 });
+  readonly handleRequest: (req: Request, server: Server<SocketConnectionData>) => Promise<Response | undefined> =
+    async (req: Request, server: Server<SocketConnectionData>) => {
+      const socketUpgradeResult = await tryUpgradeSocket({ req, server });
+      if (socketUpgradeResult !== false) {
+        return socketUpgradeResult;
       }
 
-      ctx.params = matchedRoute.params;
+      const ctx = createContext(req);
 
-      const route = matchedRoute.route;
-      const middlewares = route.middlewares ?? [];
+      try {
+        ctx.body = await parseBody(ctx);
 
-      return await runMiddlewares(ctx, middlewares, async () => {
-        const controller = container.get(route.controller);
+        const matchedRoute = router.matchHttpRoute(
+          ctx.method as "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS",
+          ctx.path,
+        );
+        if (!matchedRoute) {
+          return ctx.text("Not Found", { status: 404 });
+        }
 
-        const handler = controller.handler;
-        return await handler.call(controller, ctx);
-      });
-    } catch (err) {
-      return handleRouteException(ctx, err);
-    }
-  };
+        ctx.params = matchedRoute.params;
+
+        const route = matchedRoute.route;
+        const middlewares = route.middlewares ?? [];
+
+        return await runMiddlewares(ctx, middlewares, async () => {
+          const controller = resolveController(route.controller);
+          const handler = controller.handler;
+          return await handler.call(controller, ctx);
+        });
+      } catch (err) {
+        return handleRouteException(ctx, err);
+      }
+    };
 }

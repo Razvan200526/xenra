@@ -1,16 +1,16 @@
-import { MiddlwareException } from "../exceptions/MiddlwareException";
+import { MiddlewareException } from "../exceptions/MiddlewareException";
 import type { Context, Middleware } from "../types";
 
-export async function runMiddlewares<TContext extends Context>(
+export async function runMiddlewares<TContext extends Context, TResult>(
   ctx: TContext,
-  middlewares: Middleware<TContext>[],
-  handler: () => Promise<Response>,
-): Promise<Response> {
+  middlewares: Middleware<TContext, TResult>[],
+  handler: () => Promise<TResult>,
+): Promise<TResult> {
   let index = -1;
 
-  async function dispatch(i: number): Promise<Response> {
+  async function dispatch(i: number): Promise<TResult> {
     if (i <= index) {
-      throw new MiddlwareException("next() called multiple times");
+      throw new MiddlewareException("next() called multiple times");
     }
 
     index = i;

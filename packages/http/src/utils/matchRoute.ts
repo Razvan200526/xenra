@@ -1,7 +1,7 @@
-import type { RegisteredRoute } from "../types";
+import type { RegisteredHttpRoute, RegisteredRoute, RegisteredSocketRoute } from "../types";
 
-export type RouteMatch = {
-  route: RegisteredRoute;
+export type RouteMatch<TRoute extends RegisteredRoute = RegisteredRoute> = {
+  route: TRoute;
   params: Record<string, string>;
 };
 
@@ -46,10 +46,30 @@ function getRouteParams(routePath: string, requestPath: string): Record<string, 
   return params;
 }
 
-export function matchRoute(routes: RegisteredRoute[] | undefined, method: string, path: string): RouteMatch | null {
+export function matchRoute(
+  routes: RegisteredRoute[] | undefined,
+  method: string,
+  path: string,
+): RouteMatch<RegisteredHttpRoute> | null {
   const normalizedMethod = method.toUpperCase();
   for (const route of routes ?? []) {
-    if (route.method !== normalizedMethod) {
+    if (route.isSocket || route.method !== normalizedMethod) {
+      continue;
+    }
+
+    const params = getRouteParams(route.path, path);
+    if (params) {
+      return { route, params };
+    }
+  }
+
+  return null;
+}
+
+export type SocketRouteMatch = RouteMatch<RegisteredSocketRoute>;
+export function matchSocketRoute(path: string, routes?: RegisteredRoute[]): SocketRouteMatch | null {
+  for (const route of routes ?? []) {
+    if (!route.isSocket) {
       continue;
     }
 

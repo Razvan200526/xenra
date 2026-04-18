@@ -8,7 +8,7 @@ export const handleRouteException = (ctx: Context, err: unknown) => {
       {
         error: err.message,
       },
-      { status: err.status_code ?? 400 },
+      { status: err.statusCode ?? 400 },
     );
   }
 

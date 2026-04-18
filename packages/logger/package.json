@@ -1,14 +1,29 @@
 {
   "name": "@xenra/logger",
+  "type": "module",
   "private": true,
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bunup"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "exports": {
-    ".": "./src/index.ts"
   },
   "dependencies": {
     "figures": "^6.1.0",

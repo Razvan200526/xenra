@@ -2,12 +2,12 @@
 
 import { Container as InversifyContainer, injectable } from "inversify";
 import { ContainerException } from "./ContainerException";
-import { EContainerScope, type IContainer } from "./types";
+import { type Constructor, EContainerScope, type IContainer } from "./types";
 
 const di = new InversifyContainer();
 
 export class Container implements IContainer {
-  public add(target: new (...args: any[]) => any, scope = EContainerScope.Singleton): void {
+  public add(target: Constructor, scope: EContainerScope = EContainerScope.Singleton): void {
     try {
       di.unbind(target);
     } catch {}
@@ -30,7 +30,7 @@ export class Container implements IContainer {
     }
   }
 
-  public get<T>(target: new (...args: any[]) => T): T {
+  public get<T>(target: Constructor<T>): T {
     try {
       return di.get<T>(target);
     } catch (error) {
@@ -46,7 +46,7 @@ export class Container implements IContainer {
       di.unbind(identifier);
     }
   }
-  public has(target: new (...args: any[]) => unknown): boolean {
+  public has(target: Constructor): boolean {
     return di.isBound(target);
   }
   public getConstant<T>(identifier: string | symbol): T {
@@ -71,11 +71,11 @@ export class Container implements IContainer {
     return di.isBound(identifier);
   }
 
-  public remove(target: new (...args: any[]) => unknown): void {
+  public remove(target: Constructor): void {
     if (di.isBound(target)) {
       di.unbind(target);
     }
   }
 }
 
-export const container = new Container();
+export const container: Container = new Container();

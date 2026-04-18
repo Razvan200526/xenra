@@ -3,7 +3,7 @@
   "license": "MIT",
   "scripts": {
     "build": "bunx nx run-many -t build --output-style=stream --verbose",
-    "test": "bun test --path-ignore-patterns '**/dist/**'",
+    "test": "for dir in packages/*; do if [ -d \"$dir/tests\" ]; then (cd \"$dir\" && bun test tests); fi; done",
     "check": "bun install && bun run build && bun run lint && bun run test",
     "fmt": "bunx @biomejs/biome check --write",
     "lint": "bunx @biomejs/biome check .",
@@ -33,6 +33,7 @@
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.18",
     "@types/node": "20.19.9",
+    "bunup": "^0.16.31",
     "esbuild": "^0.27.0",
     "nx": "22.6.5",
     "tslib": "^2.3.0",

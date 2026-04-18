@@ -1,10 +1,29 @@
 {
   "name": "@xenra/decorators",
-  "module": "index.ts",
   "type": "module",
   "private": true,
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./src": {
+      "import": {
+        "types": "./dist/src/index.d.ts",
+        "default": "./dist/src/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "bunup"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -13,6 +32,7 @@
     "@xenra/http": "workspace:*",
     "@xenra/logger": "workspace:*",
     "@xenra/exceptions": "workspace:*",
+    "arktype": "^2.2.0",
     "reflect-metadata": "^0.2.2"
   },
   "peerDependencies": {

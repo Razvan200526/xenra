@@ -1,69 +1,74 @@
 import "reflect-metadata";
 import {
-  type Context,
-  createValidationMiddleware,
-  type HTTPMethod,
+  defineHttpRoute,
+  defineSocketRoute,
+  type HttpMethod,
   type IController,
   type InferValidated,
-  type Middleware,
+  type RouteMetadata,
   router,
+  type SocketControllerClass,
 } from "@xenra/http";
-import type { RouteValidators } from "./types";
-import { isPathValid } from "./utils/isPathValid";
+import type { RouteConfigType, RouteValidators, SocketRouteConfigType } from "./types";
 
 const ROUTE_META = Symbol("route:meta");
 
-export type RouteConfigType<TValidators extends RouteValidators | undefined = undefined> = {
-  name: string;
-  method?: string;
-  path: string;
-  validators?: TValidators;
-  middlewares?: Middleware<Context<InferValidated<TValidators>>>[];
-  description?: string;
+type HttpRouteDecorator = <TValidators extends RouteValidators | undefined = undefined>(
+  options: RouteConfigType<TValidators>,
+) => ClassDecorator;
+
+type SocketRouteDecorator = <TValidators extends RouteValidators | undefined = undefined>(
+  options: SocketRouteConfigType<TValidators>,
+) => ClassDecorator;
+
+type RouteDecoratorApi = {
+  get: HttpRouteDecorator;
+  post: HttpRouteDecorator;
+  put: HttpRouteDecorator;
+  delete: HttpRouteDecorator;
+  patch: HttpRouteDecorator;
+  socket: SocketRouteDecorator;
 };
 
-export type RouteMetadata<TValidators extends RouteValidators | undefined = undefined> =
-  RouteConfigType<TValidators> & {
-    method: HTTPMethod;
-  };
-
-export function createRouteDecorator(method: HTTPMethod) {
+function createHttpRouteDecorator(method: HttpMethod): HttpRouteDecorator {
   return <TValidators extends RouteValidators | undefined = undefined>(
     options: RouteConfigType<TValidators>,
   ): ClassDecorator => {
     return (target) => {
-      if (!isPathValid(options.path, target.name)) {
-        process.exit(1);
-      }
-
-      const meta: RouteMetadata<TValidators> = {
-        ...options,
+      const { meta, route } = defineHttpRoute(
+        target as unknown as IController<InferValidated<TValidators>>,
         method,
-      };
+        options,
+      );
 
       Reflect.defineMetadata(ROUTE_META, meta, target);
-
-      const route = {
-        name: meta.name,
-        method: meta.method,
-        path: meta.path,
-        handler: "handler",
-        controller: target as unknown as IController,
-        middlewares: [...(meta.middlewares ?? []), createValidationMiddleware(meta)] as Middleware[],
-        ...(meta.validators ? { validators: meta.validators } : {}),
-      };
-
       router.addRoute(route);
     };
   };
 }
 
-export const Route = {
-  get: createRouteDecorator("GET"),
-  post: createRouteDecorator("POST"),
-  put: createRouteDecorator("PUT"),
-  delete: createRouteDecorator("DELETE"),
-  patch: createRouteDecorator("PATCH"),
+function createSocketRouteDecorator(): SocketRouteDecorator {
+  return <TValidators extends RouteValidators | undefined = undefined>(options: SocketRouteConfigType<TValidators>) => {
+    return (target) => {
+      const { meta, route } = defineSocketRoute(
+        // biome-ignore lint/suspicious/noExplicitAny: <trust me>
+        target as unknown as SocketControllerClass<any, InferValidated<TValidators>>,
+        options,
+      );
+
+      Reflect.defineMetadata(ROUTE_META, meta, target);
+      router.addSocketRoute(route);
+    };
+  };
+}
+
+export const Route: RouteDecoratorApi = {
+  get: createHttpRouteDecorator("GET"),
+  post: createHttpRouteDecorator("POST"),
+  put: createHttpRouteDecorator("PUT"),
+  delete: createHttpRouteDecorator("DELETE"),
+  patch: createHttpRouteDecorator("PATCH"),
+  socket: createSocketRouteDecorator(),
 };
 
 export function getRouteMetadata<TValidators extends RouteValidators | undefined = undefined>(
